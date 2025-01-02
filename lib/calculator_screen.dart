@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'calculator_button.dart';
+
 class CalculatorScreen extends StatefulWidget {
-  static const String routeName = "Calculator";
+  final ValueNotifier<ThemeMode> themeNotifier;
+
+  const CalculatorScreen({Key? key, required this.themeNotifier}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return CalculatorScreenState();
   }
 }
-class CalculatorScreenState extends State<CalculatorScreen>{
-  String resultText="";
+
+class CalculatorScreenState extends State<CalculatorScreen> {
+  String resultText = "";
+  String savedNumber = '';
+  String savedOperator = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +32,23 @@ class CalculatorScreenState extends State<CalculatorScreen>{
             ),
           ),
         ),
-        backgroundColor: Colors.blue,
+        actions: [
+          // Toggle button to switch between light and dark themes
+          IconButton(
+            icon: Icon(
+              widget.themeNotifier.value == ThemeMode.dark
+                  ? Icons.wb_sunny
+                  : Icons.nightlight_round,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              // Toggle between light and dark theme
+              widget.themeNotifier.value = widget.themeNotifier.value == ThemeMode.dark
+                  ? ThemeMode.light
+                  : ThemeMode.dark;
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -35,77 +59,106 @@ class CalculatorScreenState extends State<CalculatorScreen>{
               alignment: Alignment.topLeft,
               child: Column(
                 children: [
-                Text(
+                  Text(
                     savedNumber,
-                style: TextStyle(
-                  fontSize: 40,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,)),
-                  Text(resultText,
+                    style: TextStyle(
+                      fontSize: 40,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    resultText,
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
-                    ),),
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
           Expanded(
-            flex: 8,
-            child: Container(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      ElevatedButton(onPressed: (){
-                        setState(() {
-                          resultText='';
-                          savedNumber='';
-                          savedOperator='';
-                        });
-                      }, child: Text("ClR")),
-                    ],
+            flex: 2,
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Container(
+                  margin: EdgeInsets.only(bottom: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        // Want to remove the last character
+                        resultText = resultText.substring(0, resultText.length - 1);
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+
+                    ),
+                    child: Icon(Icons.backspace_outlined, size: 40, color: Theme.of(context).primaryColor),
                   ),
-                  Row(
-                    children: [
-                      CalculatorButton(title: "7",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"8",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"9",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"X",btnClick:onOperatorClicked ,),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      CalculatorButton(title:"4",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"5",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"6",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"+",btnClick:onOperatorClicked ,),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      CalculatorButton(title:"1",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"2",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"3",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"-",btnClick:onOperatorClicked ,),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      CalculatorButton(title:"/",btnClick:onOperatorClicked ,),
-                      CalculatorButton(title:"0",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:".",btnClick:onDigitClicked ,),
-                      CalculatorButton(title:"=",btnClick:onEqualClicked ,),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
-          )
+          ),
+          Expanded(
+            flex: 10,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      CalculatorButton(title: "AC", btnClick: onACClicked, color: Colors.grey.shade900),
+                      CalculatorButton(title: "7", btnClick: onDigitClicked),
+                      CalculatorButton(title: "4", btnClick: onDigitClicked),
+                      CalculatorButton(title: "1", btnClick: onDigitClicked),
+                      CalculatorButton(title: "/", btnClick: onOperatorClicked, color: Colors.grey.shade900),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Spacer(flex: 1,),
+                      CalculatorButton(title: "8", btnClick: onDigitClicked),
+                      CalculatorButton(title: "5", btnClick: onDigitClicked),
+                      CalculatorButton(title: "2", btnClick: onDigitClicked),
+                      CalculatorButton(title: "0", btnClick: onDigitClicked),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Spacer(flex: 1,),
+
+                      CalculatorButton(title: "9", btnClick: onDigitClicked),
+                      CalculatorButton(title: "6", btnClick: onDigitClicked),
+                      CalculatorButton(title: "3", btnClick: onDigitClicked),
+                      CalculatorButton(title: ".", btnClick: onOperatorClicked),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: [
+                    CalculatorButton(title: "X", btnClick: onOperatorClicked, color: Colors.grey.shade900),
+                    CalculatorButton(title: "+", btnClick: onOperatorClicked, color: Colors.grey.shade900),
+                    CalculatorButton(title: "-", btnClick: onOperatorClicked, color: Colors.grey.shade900),
+                    CalculatorButton(title: "=", btnClick: onEqualClicked, color: Theme.of(context).primaryColor),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
+
   onDigitClicked(String btnText){
     if(btnText=="."){
       if(resultText.contains(".")){
@@ -138,35 +191,39 @@ class CalculatorScreenState extends State<CalculatorScreen>{
     });
 
   }
-  String savedNumber='';
-  String savedOperator='';
+  onACClicked(String btnText){
+    setState(() {
+      resultText='';
+      savedNumber='';
+      savedOperator='';
+    }
+
+    );}
   Calculate(double lhs,String operator ,double rhs){
     late double result;
-  if(operator=="+"){
-    result=lhs+rhs;
-  }
-  else if(operator=="X"){
-    result=lhs*rhs;
-  }else if(operator=="/"){
-    result=lhs/rhs;
-  }else if(operator=="-"){
-    result=lhs-rhs;
-  }
-  return result.toString();
+    if(operator=="+"){
+      result=lhs+rhs;
+    }
+    else if(operator=="X"){
+      result=lhs*rhs;
+    }else if(operator=="/"){
+      result=lhs/rhs;
+    }else if(operator=="-"){
+      result=lhs-rhs;
+    }
+    return result.toString();
   }
   onEqualClicked(String _){
 
     String newNumber=resultText;
     String calculation=Calculate(double.parse(savedNumber),savedOperator,
         double.parse(newNumber));
-   setState(() {
-     resultText=calculation;
-     savedNumber='';
-     savedOperator='';
-   });
+    setState(() {
+      resultText=calculation;
+      savedNumber='';
+      savedOperator='';
+    });
 
 
   }
-
 }
-
